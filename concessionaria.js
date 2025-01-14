@@ -80,38 +80,38 @@ function coletarDadosVenda() {
     const email = prompt("E-mail do cliente: ");
     const cpf = prompt("CPF do cliente: ");
     const telefone = prompt("Telefone do cliente: ");
-  
+
     const cliente = new Cliente(nome, email, cpf, telefone);
     const venda = new Venda(id, cliente);
-  
+
     coletarDadosVeiculo(venda);
-  }
-  
-  function coletarDadosVeiculo(venda) {
+}
+
+function coletarDadosVeiculo(venda) {
     do {
-      const codigo = prompt("Código do veículo:");
-      const tipo = prompt("Tipo do veículo:");
-      const marca = prompt("Marca do veículo:");
-      const modelo = prompt("Modelo do veículo: ");
-      const cor = prompt("Cor do veículo:");
-      const preco = prompt("Preço do veículo:");
-  
-      const veiculo = new Veiculo(
-        codigo,
-        tipo,
-        marca,
-        modelo,
-        cor,
-        parseFloat(preco)
-      );
-      venda.adicionarVeiculo(veiculo);
+        const codigo = prompt("Código do veículo:");
+        const tipo = prompt("Tipo do veículo:");
+        const marca = prompt("Marca do veículo:");
+        const modelo = prompt("Modelo do veículo: ");
+        const cor = prompt("Cor do veículo:");
+        const preco = prompt("Preço do veículo:");
+
+        const veiculo = new Veiculo(
+            codigo,
+            tipo,
+            marca,
+            modelo,
+            cor,
+            parseFloat(preco)
+        );
+        venda.adicionarVeiculo(veiculo);
     } while (confirm("Deseja adicionar mais um veículo?"));
     venda.adicionar();
-  
+
     if (confirm("Deseja adicionar mais uma venda? ")) {
-      coletarDadosVenda();
+        coletarDadosVenda();
     } else {
-      alert("Venda registrada com sucesso.");
-      exibirVendas();
+        alert("Venda registrada com sucesso.");
+        exibirVendas();
     }
-  }
+}
