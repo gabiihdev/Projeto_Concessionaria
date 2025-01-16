@@ -1,4 +1,6 @@
+const readline = require("readline");
 const vendas = [];
+let idVenda = 0;
 
 class Veiculo {
     constructor(codigo, tipo, marca, modelo, cor, preco) {
@@ -39,7 +41,7 @@ class Venda {
 
 function exibirVendas() {
     if (vendas.length === 0) {
-        console.log("Nenhuma venda registrada.");
+        console.log(">> NENHUMA VENDA REGISTRADA.");
         return;
     }
 
@@ -55,15 +57,15 @@ function exibirVendas() {
         texto += `Telefone: ${venda.cliente.telefone}\n\n\n`;
 
         texto += `>>> INFORMAÇÕES DOS VEÍCULOS\n\n`;
-        texto += `Código`.padEnd(15) + `Tipo`.padEnd(15) + `Marca`.padEnd(15) + `Modelo`.padEnd(15) + `Cor`.padEnd(15) + `Preço`.padStart(5) + "\n";
+        texto += `Código`.padEnd(13) + `Tipo`.padEnd(13) + `Marca`.padEnd(15) + `Modelo`.padEnd(22) + `Cor`.padEnd(13) + `Preço`.padStart(5) + "\n";
         texto += "-".repeat(90) + "\n";
 
         venda.veiculos.forEach((veiculo) => {
-            texto += veiculo.codigo.toString().padEnd(15) +
-                veiculo.tipo.padEnd(15) +
+            texto += veiculo.codigo.toString().padEnd(13) +
+                veiculo.tipo.padEnd(13) +
                 veiculo.marca.padEnd(15) +
-                veiculo.modelo.padEnd(15) +
-                veiculo.cor.padEnd(15) +
+                veiculo.modelo.padEnd(22) +
+                veiculo.cor.padEnd(13) +
                 `R$${veiculo.preco.toFixed(2)}`.padStart(5) + "\n";
         });
 
@@ -74,27 +76,38 @@ function exibirVendas() {
     console.log(texto)
 };
 
-function coletarDadosVenda() {
-    const id = prompt("ID da venda: ");
-    const nome = prompt("Nome do cliente: ");
-    const email = prompt("E-mail do cliente: ");
-    const cpf = prompt("CPF do cliente: ");
-    const telefone = prompt("Telefone do cliente: ");
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function perguntar(pergunta) {
+    return new Promise((resposta) => rl.question(pergunta, resposta));
+};
+
+async function coletarDadosVenda() {
+    const id = ++idVenda;
+    console.log(`\nID da venda: ${id}`)
+    const nome = await perguntar("Nome do cliente: ");
+    const email = await perguntar("E-mail do cliente: ");
+    const cpf = await perguntar("CPF do cliente: ");
+    const telefone = await perguntar("Telefone do cliente: ");
 
     const cliente = new Cliente(nome, email, cpf, telefone);
     const venda = new Venda(id, cliente);
 
-    coletarDadosVeiculo(venda);
+    console.log("-".repeat(25));
+    await coletarDadosVeiculo(venda);
 }
 
-function coletarDadosVeiculo(venda) {
+async function coletarDadosVeiculo(venda) {
     do {
-        const codigo = prompt("Código do veículo:");
-        const tipo = prompt("Tipo do veículo:");
-        const marca = prompt("Marca do veículo:");
-        const modelo = prompt("Modelo do veículo: ");
-        const cor = prompt("Cor do veículo:");
-        const preco = prompt("Preço do veículo:");
+        const codigo = await perguntar("\nCódigo do veículo: ");
+        const tipo = await perguntar("Tipo do veículo: ");
+        const marca = await perguntar("Marca do veículo: ");
+        const modelo = await perguntar("Modelo do veículo: ");
+        const cor = await perguntar("Cor do veículo: ");
+        const preco = await perguntar("Preço do veículo: ");
 
         const veiculo = new Veiculo(
             codigo,
@@ -104,14 +117,23 @@ function coletarDadosVeiculo(venda) {
             cor,
             parseFloat(preco)
         );
+
         venda.adicionarVeiculo(veiculo);
-    } while (confirm("Deseja adicionar mais um veículo?"));
+        console.log("-".repeat(25));
+    } while ((await perguntar("\n>> Deseja adicionar mais um veículo? (sim/não): ")).toLowerCase() === "sim");
     venda.adicionar();
 
-    if (confirm("Deseja adicionar mais uma venda? ")) {
-        coletarDadosVenda();
+    if ((await perguntar(">> Deseja adicionar mais uma venda? (sim/não): ")).toLowerCase() === "sim") {
+        await coletarDadosVenda();
     } else {
-        alert("Venda registrada com sucesso.");
+        console.log("\n>> VENDA REGISTRADA COM SUCESSO!!\n\n");
         exibirVendas();
+        rl.close();
     }
 }
+
+(async () => {
+    console.log("REGISTRO DE VENDAS".padStart(30));
+    console.log("=".repeat(50))
+    await coletarDadosVenda();
+})();
