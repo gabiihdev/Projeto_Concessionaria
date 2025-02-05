@@ -37,6 +37,18 @@ class Venda {
     adicionarVeiculo(veiculo) {
         this.veiculos.push(veiculo);
     }
+
+    removerVeiculo(codigo) {
+        const automovel = this.veiculos.findIndex((veiculo) => veiculo.codigo === codigo);
+
+        if (automovel !== -1) {
+            const veiculoRemovido = this.veiculos[automovel];
+            this.veiculos.splice(automovel, 1);
+            console.log(`\n>> VEÍCULO "${veiculoRemovido.marca.toUpperCase()} ${veiculoRemovido.modelo.toUpperCase()} ${veiculoRemovido.cor.toUpperCase()}" REMOVIDO DA VENDA ${this.id} COM SUCESSO!!\n`);
+        } else {
+            console.log(`\n>> VEÍCULO ${codigo} NÃO ENCONTRADO.`)
+        }
+    }
 }
 
 function exibirVendas() {
@@ -48,7 +60,6 @@ function exibirVendas() {
     let texto = "";
 
     vendas.forEach((venda) => {
-        texto += "=".repeat(90) + "\n"
         texto += `ID da venda: ${venda.id.toString().padEnd(10)} Status: ${venda.statusVenda.padStart(10)} \n\n`;
         texto += `>>> DADOS DO CLIENTE\n\n`;
         texto += `Nome: ${venda.cliente.nome}\n`;
@@ -69,7 +80,8 @@ function exibirVendas() {
                 `R$${veiculo.preco.toFixed(2)}`.padStart(5) + "\n";
         });
 
-        texto += "\n" + "=".repeat(90) + "\n\n\n"
+        texto += "-".repeat(90);
+        texto += "\n\n"
 
     });
 
@@ -86,8 +98,9 @@ function perguntar(pergunta) {
 };
 
 async function coletarDadosVenda() {
+    console.log("\nNOVA VENDA\n");
     const id = ++idVenda;
-    console.log(`\nID da venda: ${id}`)
+    console.log(`ID da venda: ${id}`)
     const nome = await perguntar("Nome do cliente: ");
     const email = await perguntar("E-mail do cliente: ");
     const cpf = await perguntar("CPF do cliente: ");
@@ -120,20 +133,64 @@ async function coletarDadosVeiculo(venda) {
 
         venda.adicionarVeiculo(veiculo);
         console.log("-".repeat(25));
-    } while ((await perguntar("\n>> Deseja adicionar mais um veículo? (sim/não): ")).toLowerCase() === "sim");
+    } while ((await perguntar("\n>> Deseja adicionar mais um veículo? (s/n): ")).toLowerCase() === "s");
     venda.adicionar();
 
-    if ((await perguntar(">> Deseja adicionar mais uma venda? (sim/não): ")).toLowerCase() === "sim") {
+    if ((await perguntar(">> Deseja adicionar mais uma venda? (s/n): ")).toLowerCase() === "s") {
         await coletarDadosVenda();
     } else {
-        console.log("\n>> VENDA REGISTRADA COM SUCESSO!!\n\n");
-        exibirVendas();
-        rl.close();
+        console.log("\n>> VENDAS REGISTRADAS COM SUCESSO!!\n");
     }
 }
 
-(async () => {
-    console.log("REGISTRO DE VENDAS".padStart(30));
-    console.log("=".repeat(50))
-    await coletarDadosVenda();
-})();
+function procurarVenda(idVenda) {
+    return vendas.find((venda) => venda.id === parseInt(idVenda));
+}
+
+async function excluirVeiculo() {
+    const idVenda = await perguntar(">> Digite o ID da venda que deseja excluir um veículo: ");
+    const vendaLocalizada = procurarVenda(idVenda);
+
+    if (!vendaLocalizada) {
+        console.log(`\n>> VENDA ${idVenda} NÃO ENCONTRADA.`);
+        return;
+    }
+
+    const codigoVeiculo = await perguntar(">> Digite o código do veículo que deseja excluir: ");
+
+    vendaLocalizada.removerVeiculo(codigoVeiculo);
+}
+
+async function menu() {
+    while (true) {
+        console.log("_".repeat(90) + "\n");
+        console.log("=".repeat(20) + " MENU " + "=".repeat(20));
+        console.log("[1] - Registrar uma venda");
+        console.log("[2] - Exibir vendas");
+        console.log("[3] - Excluir um veículo")
+        console.log("[0] - Sair do programa\n");
+
+        const opcao = await perguntar("Escolha uma opção: ");
+        console.log("_".repeat(90));
+
+        switch (opcao) {
+            case "1":
+                await coletarDadosVenda();
+                break;
+            case "2":
+                await exibirVendas();
+                break;
+            case "3":
+                await excluirVeiculo();
+                break;
+            case "0":
+                console.log(">> Programa encerrado.");
+                rl.close();
+                return;
+            default:
+                console.log("\n>> Opção inválida.");
+        }
+    }
+}
+
+menu()
