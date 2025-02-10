@@ -2,6 +2,8 @@ const readline = require("readline");
 const vendas = [];
 let idVenda = 0;
 
+const opcoesStatus = ["Pendente", "Em andamento", "Concluída", "Cancelada"];
+
 class Veiculo {
     constructor(codigo, tipo, marca, modelo, cor, preco) {
         this.codigo = codigo;
@@ -49,17 +51,23 @@ class Venda {
             console.log(`\n>> VEÍCULO ${codigo} NÃO ENCONTRADO.`)
         }
     }
+
+    alterarStatus(novoStatusVenda) {
+        this.statusVenda = novoStatusVenda;
+    }
 }
 
-function exibirVendas() {
-    if (vendas.length === 0) {
+function exibirVendas(vendaFiltrada = null) {
+    const listaVendas = vendaFiltrada ? [vendaFiltrada] : vendas;
+
+    if (listaVendas.length === 0) {
         console.log(">> NENHUMA VENDA REGISTRADA.");
         return;
     }
 
     let texto = "";
 
-    vendas.forEach((venda) => {
+    listaVendas.forEach((venda) => {
         texto += `ID da venda: ${venda.id.toString().padEnd(10)} Status: ${venda.statusVenda.padStart(10)} \n\n`;
         texto += `>>> DADOS DO CLIENTE\n\n`;
         texto += `Nome: ${venda.cliente.nome}\n`;
@@ -157,8 +165,29 @@ async function excluirVeiculo() {
     }
 
     const codigoVeiculo = await perguntar(">> Digite o código do veículo que deseja excluir: ");
-
     vendaLocalizada.removerVeiculo(codigoVeiculo);
+}
+
+async function alterarStatusVenda() {
+    const idVenda = await perguntar(">> Digite o ID da venda que deseja alterar o status: ");
+    const vendaLocalizada = procurarVenda(idVenda);
+
+    if (!vendaLocalizada) {
+        console.log(`\n>> VENDA ${idVenda} NÃO ENCONTRADA.`);
+        return;
+    }
+
+    console.log()
+    const indexNovoStatus = await perguntar(" 1 - Pendente\n 2 - Em andamento\n 3 - Concluída\n 4 - Cancelada\n\n>> Digite o número que corresponde ao status de venda desejado: ") - 1;
+
+    if (indexNovoStatus >= 0 && indexNovoStatus < opcoesStatus.length) {
+        vendaLocalizada.alterarStatus(opcoesStatus[indexNovoStatus]);
+        console.log(`>> STATUS DA VENDA ${idVenda} ALTERADO COM SUCESSO!!\n\n`);
+        console.log("====== VENDA COM O STATUS ALTERADO ======\n")
+        exibirVendas(vendaLocalizada);
+    } else {
+        console.log(`>> Opção inválida.`);
+    }
 }
 
 async function menu() {
@@ -167,7 +196,8 @@ async function menu() {
         console.log("=".repeat(20) + " MENU " + "=".repeat(20));
         console.log("[1] - Registrar uma venda");
         console.log("[2] - Exibir vendas");
-        console.log("[3] - Excluir um veículo")
+        console.log("[3] - Excluir um veículo de uma venda")
+        console.log("[4] - Alterar o status de uma venda")
         console.log("[0] - Sair do programa\n");
 
         const opcao = await perguntar("Escolha uma opção: ");
@@ -183,6 +213,9 @@ async function menu() {
             case "3":
                 await excluirVeiculo();
                 break;
+            case "4":
+                await alterarStatusVenda();
+                break
             case "0":
                 console.log(">> Programa encerrado.");
                 rl.close();
