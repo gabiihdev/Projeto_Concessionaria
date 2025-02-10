@@ -190,6 +190,33 @@ async function alterarStatusVenda() {
     }
 }
 
+function calcularTotalVendas() {
+    return vendas.map((venda) => {
+        const quantidadeVeiculos = venda.veiculos.length;
+        const totalVendas = venda.veiculos.reduce(
+            (total, veiculo) => total + parseFloat(veiculo.preco), 0);
+
+        return {
+            idVenda: venda.id,
+            quantidadeVeiculos,
+            totalVendas,
+        };
+    });
+}
+
+function exibirTotalVendas() {
+    const totaisDeVenda = calcularTotalVendas(vendas);
+
+    let texto = "====== TOTAL DAS VENDAS ======\n\n";
+    totaisDeVenda.forEach((total) => {
+        texto += `ID da venda: ${total.idVenda}\n`;
+        texto += `Quantidade de veículos: ${total.quantidadeVeiculos}\n`;
+        texto += `Valor total: R$${total.totalVendas.toFixed(2)}\n\n`;
+    });
+
+    console.log(texto);
+}
+
 async function menu() {
     while (true) {
         console.log("_".repeat(90) + "\n");
@@ -198,6 +225,7 @@ async function menu() {
         console.log("[2] - Exibir vendas");
         console.log("[3] - Excluir um veículo de uma venda")
         console.log("[4] - Alterar o status de uma venda")
+        console.log("[5] - Exibir o total das vendas")
         console.log("[0] - Sair do programa\n");
 
         const opcao = await perguntar("Escolha uma opção: ");
@@ -215,6 +243,9 @@ async function menu() {
                 break;
             case "4":
                 await alterarStatusVenda();
+                break
+            case "5":
+                await exibirTotalVendas();
                 break
             case "0":
                 console.log(">> Programa encerrado.");
