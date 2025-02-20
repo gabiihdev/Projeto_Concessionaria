@@ -1,6 +1,77 @@
 const readline = require("readline");
-const vendas = [];
-let idVenda = 0;
+const vendasIniciais = [
+    {
+        id: 1,
+        cliente: {
+            nome: "João Silva",
+            email: "joao@email.com",
+            cpf: "123.456.789-00",
+            telefone: "(11) 99999-9999",
+        },
+        veiculos: [
+            { codigo: 2391, tipo: "Carro", marca: "Honda", modelo: "Civic G10", cor: "Preto", preco: 295900 },
+            { codigo: 1783, tipo: "Moto", marca: "Triumph", modelo: "Tyger 900", cor: "Preta", preco: 54000 },
+        ],
+        statusVenda: "Pendente",
+    },
+    {
+        id: 2,
+        cliente: {
+            nome: "Maria Oliveira",
+            email: "maria@email.com",
+            cpf: "987.654.321-00",
+            telefone: "(21) 98888-8888",
+        },
+        veiculos: [
+            { codigo: 1206, tipo: "Carro", marca: "Nissan", modelo: "Skyline GT-R R34", cor: "Azul", preco: 1579000 },
+            { codigo: 8011, tipo: "Moto", marca: "Kawasaki", modelo: "Ninja H2R", cor: "Preta", preco: 57500 },
+        ],
+        statusVenda: "Concluída",
+    },
+    {
+        id: 3,
+        cliente: {
+            nome: "Carlos Pereira",
+            email: "carlos@email.com",
+            cpf: "147.258.369-00",
+            telefone: "(31) 91234-5678",
+        },
+        veiculos: [
+            { codigo: 2806, tipo: "Carro", marca: "Chevrolet", modelo: "Corvette Z06", cor: "Laranja", preco: 1698000 },
+            { codigo: 1038, tipo: "Carro", marca: "Lamborghini", modelo: "Aventador SVJ", cor: "Vermelha", preco: 8000000 },
+            { codigo: 1510, tipo: "Moto", marca: "Yamaha", modelo: "YZF-R7", cor: "Preta", preco: 60000 },
+        ],
+        statusVenda: "Em andamento",
+    },
+    {
+        id: 4,
+        cliente: {
+            nome: "Fernanda Costa",
+            email: "fernanda@email.com",
+            cpf: "321.654.987-00",
+            telefone: "(41) 99888-7777",
+        },
+        veiculos: [
+            { codigo: 2262, tipo: "Carro", marca: "Dodge", modelo: "Charger 1970", cor: "Preto", preco: 1000000 },
+        ],
+        statusVenda: "Pendente",
+    },
+    {
+        id: 5,
+        cliente: {
+            nome: "Lucas Lima",
+            email: "lucas@email.com",
+            cpf: "654.987.123-00",
+            telefone: "(51) 99999-8888",
+        },
+        veiculos: [
+            { codigo: 3160, tipo: "Moto", marca: "Suzuki", modelo: "GSX-R750", cor: "Azul", preco: 48900 },
+        ],
+        statusVenda: "Concluída",
+    },
+];
+
+let idVenda = vendasIniciais.length;
 
 const opcoesStatus = ["Pendente", "Em andamento", "Concluída", "Cancelada"];
 
@@ -41,7 +112,7 @@ class Venda {
     }
 
     removerVeiculo(codigo) {
-        const automovel = this.veiculos.findIndex((veiculo) => veiculo.codigo === codigo);
+        const automovel = this.veiculos.findIndex((veiculo) => veiculo.codigo === Number(codigo));
 
         if (automovel !== -1) {
             const veiculoRemovido = this.veiculos[automovel];
@@ -56,6 +127,29 @@ class Venda {
         this.statusVenda = novoStatusVenda;
     }
 }
+
+const vendas = vendasIniciais.map(venda => {
+    const novaVenda = new Venda(venda.id, new Cliente(
+        venda.cliente.nome,
+        venda.cliente.email,
+        venda.cliente.cpf,
+        venda.cliente.telefone
+    ));
+
+    venda.veiculos.forEach(veiculo => {
+        novaVenda.adicionarVeiculo(new Veiculo(
+            veiculo.codigo,
+            veiculo.tipo,
+            veiculo.marca,
+            veiculo.modelo,
+            veiculo.cor,
+            veiculo.preco
+        ));
+    });
+
+    novaVenda.alterarStatus(venda.statusVenda);
+    return novaVenda;
+});
 
 function exibirVendas(vendaFiltrada = null) {
     const listaVendas = vendaFiltrada ? [vendaFiltrada] : vendas;
@@ -166,6 +260,8 @@ async function excluirVeiculo() {
 
     const codigoVeiculo = await perguntar(">> Digite o código do veículo que deseja excluir: ");
     vendaLocalizada.removerVeiculo(codigoVeiculo);
+    console.log('======== VENDA ATUALIZADA ========\n')
+    exibirVendas(vendaLocalizada)
 }
 
 async function alterarStatusVenda() {
@@ -183,7 +279,7 @@ async function alterarStatusVenda() {
     if (indexNovoStatus >= 0 && indexNovoStatus < opcoesStatus.length) {
         vendaLocalizada.alterarStatus(opcoesStatus[indexNovoStatus]);
         console.log(`>> STATUS DA VENDA ${idVenda} ALTERADO COM SUCESSO!!\n\n`);
-        console.log("====== VENDA COM O STATUS ALTERADO ======\n")
+        console.log("======== VENDA ATUALIZADA ========\n")
         exibirVendas(vendaLocalizada);
     } else {
         console.log(`>> Opção inválida.`);
