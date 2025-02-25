@@ -183,7 +183,7 @@ function exibirVendas(vendaFiltrada = null) {
         });
 
         texto += "-".repeat(90);
-        texto += "\n\n"
+        texto += "\n\n" + "_".repeat(90) + "\n";
 
     });
 
@@ -260,7 +260,9 @@ async function excluirVeiculo() {
 
     const codigoVeiculo = await perguntar(">> Digite o código do veículo que deseja excluir: ");
     vendaLocalizada.removerVeiculo(codigoVeiculo);
-    console.log('======== VENDA ATUALIZADA ========\n')
+    console.log("_".repeat(90));
+    console.log("\n" + "VENDA ATUALIZADA".padStart(50))
+    console.log("_".repeat(90) + "\n");
     exibirVendas(vendaLocalizada)
 }
 
@@ -279,7 +281,9 @@ async function alterarStatusVenda() {
     if (indexNovoStatus >= 0 && indexNovoStatus < opcoesStatus.length) {
         vendaLocalizada.alterarStatus(opcoesStatus[indexNovoStatus]);
         console.log(`>> STATUS DA VENDA ${idVenda} ALTERADO COM SUCESSO!!\n\n`);
-        console.log("======== VENDA ATUALIZADA ========\n")
+        console.log("_".repeat(90));
+        console.log("\n" + "VENDA ATUALIZADA".padStart(50))
+        console.log("_".repeat(90) + "\n");
         exibirVendas(vendaLocalizada);
     } else {
         console.log(`>> Opção inválida.`);
@@ -303,7 +307,8 @@ function calcularTotalVendas() {
 function exibirTotalVendas() {
     const totaisDeVenda = calcularTotalVendas(vendas);
 
-    let texto = "====== TOTAL DAS VENDAS ======\n\n";
+    let texto = "\n" + "TOTAL DAS VENDAS".padStart(50) + "\n";
+    texto += "_".repeat(90) + "\n\n";
     totaisDeVenda.forEach((total) => {
         texto += `ID da venda: ${total.idVenda}\n`;
         texto += `Quantidade de veículos: ${total.quantidadeVeiculos}\n`;
@@ -311,6 +316,39 @@ function exibirTotalVendas() {
     });
 
     console.log(texto);
+}
+
+function gerarRelatorioVendas() {
+    let relatorio = "\n";
+    relatorio += "RELATÓRIO DE VENDAS".padStart(50) + "\n";
+    relatorio += "_".repeat(90) + "\n\n";
+
+    vendas.forEach((venda) => {
+        const idVenda = venda.id;
+        const nomeCliente = venda.cliente.nome;
+        const emailCliente = venda.cliente.email;
+        const cpfCliente = venda.cliente.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+        const telefoneCliente = venda.cliente.telefone;
+        const totalVendas = venda.veiculos.reduce((total, veiculo) => total + veiculo.preco, 0);
+
+        const totalArredondado = Math.ceil(totalVendas);
+
+        relatorio += `ID da venda: ${idVenda}\n\n`;
+        relatorio += `Cliente: ${nomeCliente}\n`;
+        relatorio += `Email: ${emailCliente}\n`;
+        relatorio += `CPF: ${cpfCliente}\n`;
+        relatorio += `Telefone: ${telefoneCliente}\n\n`;
+
+        venda.veiculos.forEach((veiculo, index) => {
+            relatorio += `Veículo ${index + 1}: ${veiculo.marca} ${veiculo.modelo} ${veiculo.cor} | Preço: R$${veiculo.preco.toFixed(2)}\n`;
+        });
+
+        relatorio += `\nTOTAL DA VENDA = R$${totalArredondado.toFixed(2)}\n`;
+        relatorio += "_".repeat(90) + "\n\n";
+    });
+
+
+    console.log(relatorio);
 }
 
 async function menu() {
@@ -322,6 +360,7 @@ async function menu() {
         console.log("[3] - Excluir um veículo de uma venda")
         console.log("[4] - Alterar o status de uma venda")
         console.log("[5] - Exibir o total das vendas")
+        console.log("[6] - Relatório de vendas")
         console.log("[0] - Sair do programa\n");
 
         const opcao = await perguntar("Escolha uma opção: ");
@@ -342,6 +381,9 @@ async function menu() {
                 break
             case "5":
                 await exibirTotalVendas();
+                break
+            case "6":
+                await gerarRelatorioVendas();
                 break
             case "0":
                 console.log(">> Programa encerrado.");
